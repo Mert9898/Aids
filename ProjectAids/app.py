@@ -71,10 +71,9 @@ class PortMonitor:
 
     def block_ports(self, ports):
         for port in ports:
-            # Implement port blocking logic here
             logging.info(f"Blocking port: {port}")
             # Example: Use iptables or firewall-cmd on Linux, netsh on Windows
-            # subprocess.run(["sudo", "iptables", "-A", "INPUT", "-p", "tcp", "--dport", str(port), "-j", "DROP"])
+            subprocess.run(["netsh", "advfirewall", "firewall", "add", "rule", f"name=Block Port {port}", "protocol=TCP", "dir=in", f"localport={port}", "action=block"])
 
     def send_alert(self, anomalies):
         msg = MIMEText(f"Anomalous ports detected: {anomalies}")
