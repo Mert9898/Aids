@@ -29,7 +29,7 @@ class PortMonitor:
     def initialize_model(self):
         initial_ports = self.get_open_ports()
         self.open_ports_history.append(initial_ports)
-        self.model = self.train_isolation_forest(np.array(self.open_ports_history).reshape(-1, 1))
+        self.model = self.train_isolation_forest(np.array(initial_ports).reshape(-1, 1))
 
     def get_open_ports(self):
         try:
@@ -50,8 +50,9 @@ class PortMonitor:
     def update_model(self):
         if len(self.open_ports_history) > 1:
             try:
-                history_array = np.array([np.array(ports) for ports in self.open_ports_history])
-                self.model = self.train_isolation_forest(history_array.reshape(-1, 1))
+                history_array = np.array([np.array(ports) for ports in self.open_ports_history], dtype=object)
+                flattened_history = np.hstack(history_array).reshape(-1, 1)
+                self.model = self.train_isolation_forest(flattened_history)
             except ValueError as e:
                 logging.error(f"Error updating model: {e}")
 
@@ -78,11 +79,13 @@ class PortMonitor:
     def send_alert(self, anomalies):
         msg = MIMEText(f"Anomalous ports detected: {anomalies}")
         msg['Subject'] = 'Intrusion Detection Alert'
-        msg['From'] = 'your_email@example.com'
-        msg['To'] = 'admin@example.com'
+        msg['From'] = 'ozkanmertayaz@gmail.com'
+        msg['To'] = 'yzmrtzkn@outlook.com'
 
         try:
-            with smtplib.SMTP('localhost') as server:
+            with smtplib.SMTP('smtp.gmail.com', 587) as server:
+                server.starttls()
+                server.login('ozkanmertayaz@gmail.com', '06191999Mao%')
                 server.sendmail(msg['From'], [msg['To']], msg.as_string())
             logging.info("Alert sent successfully")
         except Exception as e:
