@@ -1,3 +1,11 @@
+import threading
+import time
+import subprocess
+import numpy as np
+from sklearn.ensemble import IsolationForest
+import logging
+import psutil  # Add this import
+
 class PortMonitor:
     def __init__(self, contamination=0.05, check_interval=5):
         self.open_ports = []
@@ -58,3 +66,8 @@ class PortMonitor:
 
     def send_alert(self, anomalies):
         logging.warning(f"Anomalous ports detected: {anomalies}")
+
+    def start_monitoring(self):
+        thread = threading.Thread(target=self.monitor_ports)
+        thread.daemon = True
+        thread.start()
