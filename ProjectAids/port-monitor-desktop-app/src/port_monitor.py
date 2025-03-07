@@ -1,22 +1,3 @@
-from flask import Flask, jsonify, render_template
-import threading
-import time
-import subprocess
-import numpy as np
-from sklearn.ensemble import IsolationForest
-import logging
-import smtplib
-from email.mime.text import MIMEText
-
-# Ensure psutil is installed
-try:
-    import psutil
-except ImportError:
-    subprocess.check_call(["python", '-m', 'pip', 'install', 'psutil'])
-    import psutil
-
-app = Flask(__name__)
-
 class PortMonitor:
     def __init__(self, contamination=0.05, check_interval=5):
         self.open_ports = []
@@ -73,39 +54,7 @@ class PortMonitor:
     def block_ports(self, ports):
         for port in ports:
             logging.info(f"Blocking port: {port}")
-            # Example: Use iptables or firewall-cmd on Linux, netsh on Windows
             subprocess.run(["netsh", "advfirewall", "firewall", "add", "rule", f"name=Block Port {port}", "protocol=TCP", "dir=in", f"localport={port}", "action=block"])
 
     def send_alert(self, anomalies):
-        msg = MIMEText(f"Anomalous ports detected: {anomalies}")
-        msg['Subject'] = 'Intrusion Detection Alert'
-        msg['From'] = 'ozkanmertayaz@gmail.com'
-        msg['To'] = 'yzmrtzkn@outlook.com'
-
-        try:
-            with smtplib.SMTP('smtp.gmail.com', 587) as server:
-                server.starttls()
-                server.login('ozkanmertayaz@gmail.com', '06191999Mao%')
-                server.sendmail(msg['From'], [msg['To']], msg.as_string())
-            logging.info("Alert sent successfully")
-        except Exception as e:
-            logging.error(f"Failed to send alert: {e}")
-
-port_monitor = PortMonitor()
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/api/open_ports')
-def api_open_ports():
-    return jsonify(port_monitor.open_ports)
-
-if __name__ == "__main__":
-    # Start the background thread to get open ports and detect anomalies
-    thread = threading.Thread(target=port_monitor.monitor_ports)
-    thread.daemon = True  # Ensure the thread exits when the main program exits
-    thread.start()
-    
-    # Run the Flask app
-    app.run(debug=True)
+        logging.warning(f"Anomalous ports detected: {anomalies}")

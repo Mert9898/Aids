@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>100</x>
+    <y>100</y>
+    <width>600</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Port Monitor</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTableWidget" name="tableOpenPorts">
+    <property name="columnCount">
+     <number>2</number>
+    </property>
+    <property name="rowCount">
+     <number>0</number>
+    </property>
+    <item>
+     <column>0</column>
+     <row>0</row>
+     <widget class="QTableWidgetItem">
+      <property name="text">
+       <string>Port</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <column>1</column>
+     <row>0</row>
+     <widget class="QTableWidgetItem">
+      <property name="text">
+       <string>Status</string>
+      </property>
+     </widget>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="buttonRefresh">
+    <property name="text">
+     <string>Refresh</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelStatus">
+    <property name="text">
+     <string>Status: Monitoring...</string>
+    </property>
+   </widget>
+  </widget>
+  <statusbar/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
