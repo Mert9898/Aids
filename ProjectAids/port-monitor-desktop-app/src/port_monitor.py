@@ -4,7 +4,7 @@ import subprocess
 import numpy as np
 from sklearn.ensemble import IsolationForest
 import logging
-import psutil  # Add this import
+import psutil
 
 class PortMonitor:
     def __init__(self, contamination=0.05, check_interval=5):
@@ -13,6 +13,8 @@ class PortMonitor:
         self.model = None
         self.contamination = contamination
         self.check_interval = check_interval
+        self.whitelist = set()
+        self.blacklist = set()
         self.initialize_model()
 
     def initialize_model(self):
@@ -30,7 +32,7 @@ class PortMonitor:
     def detect_anomalies(self, ports):
         if self.model:
             predictions = self.model.predict(np.array(ports).reshape(-1, 1))
-            anomalies = [port for port, prediction in zip(ports, predictions) if prediction == -1]
+            anomalies = [port for port, prediction in zip(ports, predictions) if prediction == -1 and port not in self.whitelist]
             if anomalies:
                 logging.warning(f"Anomalous ports detected: {anomalies}")
                 self.block_ports(anomalies)
@@ -61,8 +63,9 @@ class PortMonitor:
 
     def block_ports(self, ports):
         for port in ports:
-            logging.info(f"Blocking port: {port}")
-            subprocess.run(["netsh", "advfirewall", "firewall", "add", "rule", f"name=Block Port {port}", "protocol=TCP", "dir=in", f"localport={port}", "action=block"])
+            if port not in self.whitelist:
+                logging.info(f"Blocking port: {port}")
+                subprocess.run(["netsh", "advfirewall", "firewall", "add", "rule", f"name=Block Port {port}", "protocol=TCP", "dir=in", f"localport={port}", "action=block"])
 
     def send_alert(self, anomalies):
         logging.warning(f"Anomalous ports detected: {anomalies}")
@@ -71,3 +74,16 @@ class PortMonitor:
         thread = threading.Thread(target=self.monitor_ports)
         thread.daemon = True
         thread.start()
+
+    def add_to_whitelist(self, port):
+        self.whitelist.add(port)
+
+    def remove_from_whitelist(self, port):
+        self.whitelist.discard(port)
+
+    def add_to_blacklist(self, port):
+        self.blacklist.add(port)
+        self.block_ports([port])
+
+    def remove_from_blacklist(self, port):
+        self.blacklist.discard(port)

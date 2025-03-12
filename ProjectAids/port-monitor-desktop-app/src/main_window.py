@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QPushButton, QListWidget, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QPushButton, QListWidget, QMessageBox, QApplication, QLineEdit, QHBoxLayout
 from port_monitor import PortMonitor
 import sys
 import threading
+import time
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -30,6 +31,22 @@ class MainWindow(QMainWindow):
         self.block_button.clicked.connect(self.block_selected_port)
         self.layout.addWidget(self.block_button)
 
+        self.whitelist_input = QLineEdit()
+        self.whitelist_input.setPlaceholderText("Enter port to whitelist")
+        self.layout.addWidget(self.whitelist_input)
+
+        self.whitelist_button = QPushButton("Add to Whitelist")
+        self.whitelist_button.clicked.connect(self.add_to_whitelist)
+        self.layout.addWidget(self.whitelist_button)
+
+        self.blacklist_input = QLineEdit()
+        self.blacklist_input.setPlaceholderText("Enter port to blacklist")
+        self.layout.addWidget(self.blacklist_input)
+
+        self.blacklist_button = QPushButton("Add to Blacklist")
+        self.blacklist_button.clicked.connect(self.add_to_blacklist)
+        self.layout.addWidget(self.blacklist_button)
+
     def start_monitoring(self):
         self.monitoring_thread = threading.Thread(target=self.monitor_ports)
         self.monitoring_thread.daemon = True
@@ -55,6 +72,22 @@ class MainWindow(QMainWindow):
         selected_port = int(selected_items[0].text())
         self.port_monitor.block_ports([selected_port])
         QMessageBox.information(self, "Info", f"Blocked port: {selected_port}")
+
+    def add_to_whitelist(self):
+        port = self.whitelist_input.text()
+        if port.isdigit():
+            self.port_monitor.add_to_whitelist(int(port))
+            QMessageBox.information(self, "Info", f"Added port {port} to whitelist")
+        else:
+            QMessageBox.warning(self, "Warning", "Invalid port number")
+
+    def add_to_blacklist(self):
+        port = self.blacklist_input.text()
+        if port.isdigit():
+            self.port_monitor.add_to_blacklist(int(port))
+            QMessageBox.information(self, "Info", f"Added port {port} to blacklist")
+        else:
+            QMessageBox.warning(self, "Warning", "Invalid port number")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
